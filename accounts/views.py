@@ -259,7 +259,7 @@ def steam_disconnect(request):
 
 class LibraryList(GameList):  # pylint: disable=too-many-ancestors
     """Access the user's game library"""
-    template_name = 'accounts/library_show.html'
+    template_name = 'accounts/my_library.html'
     context_object_name = 'games'
     paginate_by = 25
     paginate_orphans = 10
@@ -267,16 +267,7 @@ class LibraryList(GameList):  # pylint: disable=too-many-ancestors
 
     def get_user(self):
         """Return a user object from the username url segment"""
-        try:
-            user = User.objects.get(username=self.kwargs['username'])
-        except User.DoesNotExist:
-            try:
-                user = User.objects.get(username__iexact=self.kwargs['username'])
-            except User.DoesNotExist:
-                raise Http404
-            except User.MultipleObjectsReturned:
-                raise Http404
-        return user
+        return self.request.user
 
     def get_queryset(self):
         user = self.get_user()
@@ -322,7 +313,7 @@ def library_remove(request, slug):
     library.games.remove(game)
     redirect_url = request.META.get('HTTP_REFERER')
     if not redirect_url:
-        redirect_url = reverse('library_show', kwargs={'username': request.user.username})
+        redirect_url = reverse('my_library')
     return redirect(redirect_url)
 
 
@@ -336,8 +327,7 @@ def library_steam_sync(request):
         request,
         'Your Steam library is being synced with your Lutris account'
     )
-    return redirect(reverse("library_show",
-                            kwargs={'username': user.username}))
+    return redirect(reverse("my_library"))
 
 
 @login_required
@@ -365,3 +355,27 @@ class UserDetailView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+@login_required
+def my_installers(request):
+    """List all installers a user has contributed to"""
+    return render(request, "accounts/my_installers.html", {
+        'profile_page': 'installers'
+    })
+
+
+@login_required
+def my_submissions(request):
+    """List all games submitted by the current user"""
+    return render(request, "accounts/my_submissions.html", {
+        'profile_page': 'submissions'
+    })
+
+
+@login_required
+def my_issues(request):
+    """List all issues the user has interacted with"""
+    return render(request, "accounts/my_issues.html", {
+        'profile_page': 'issues'
+    })
