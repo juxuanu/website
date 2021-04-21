@@ -73,7 +73,7 @@ You can then build the frontend assets::
 To watch for file changes and recompile assets on the fly, you can run in a
 separate terminal::
 
-    npm run watch
+    npx webpack --config webpack.dev.conf.js --watch
 
 The installer issues use another frontend stack based on VueJS. It is not
 required to build them to work on other areas of the site. To build those
@@ -132,6 +132,7 @@ Postgresql configuration
 You can get the same Postgres server used in the Docker setup by running the
 following command::
 
+    docker volume create lutrisdb_backups
     docker run -d \
         --name lutrisdb \
         --restart unless-stopped \
@@ -139,6 +140,7 @@ following command::
         -e POSGRES_DB=lutris \
         -e POSTGRES_USER=lutris \
         -p 5432:5432 \
+        -v lutrisdb_backups:/backups \
         postgres:12
 
 Quickstart::
